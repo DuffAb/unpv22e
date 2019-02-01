@@ -181,8 +181,8 @@ Mkfifo(const char *pathname, mode_t mode)
 void
 Mktemp(char *template)
 {
-	if (mktemp(template) == NULL || template[0] == 0)
-		err_quit("mktemp error");
+	if (mkstemp(template) == NULL || template[0] == 0)
+		err_quit("mkstemp error");
 }
 
 #ifdef	HAVE_SYS_MMAN_H
