@@ -1,5 +1,5 @@
 #include	"unpipc.h"
-
+// 图10-13 挂出一个信号量
 int
 main(int argc, char **argv)
 {

@@ -394,21 +394,28 @@ again:
 sem_t *
 Sem_open(const char *pathname, int oflag, ...)
 {
-	sem_t	*sem;
-	va_list	ap;
-	mode_t	mode;
-	unsigned int	value;
+	sem_t*		 sem;
+	va_list		 ap;
+	mode_t		 mode;
+	unsigned int value;
 
-	if (oflag & O_CREAT) {
+	if (oflag & O_CREAT) 
+	{
 		va_start(ap, oflag);		/* init ap to final named argument */
 		mode = va_arg(ap, va_mode_t);
 		value = va_arg(ap, unsigned int);
 		if ( (sem = sem_open(pathname, oflag, mode, value)) == SEM_FAILED)
-			err_sys("sem_open error for %s", pathname);
+		{
+			err_sys("1.sem_open error for (path:%s), oflag(%d), value(%d)", pathname, oflag, value);
+		}
 		va_end(ap);
-	} else {
+	} 
+	else 
+	{
 		if ( (sem = sem_open(pathname, oflag)) == SEM_FAILED)
-			err_sys("sem_open error for %s", pathname);
+		{
+			err_sys("2.sem_open error for %s", pathname);
+		}
 	}
 	return(sem);
 }
