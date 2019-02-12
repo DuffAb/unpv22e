@@ -1,13 +1,15 @@
 /* include main */
 #include	"unpipc.h"
-
+// 图10-17 生产者-消费者问题信号量解决方案
 #define	NBUFF	 10
 #define	SEM_MUTEX	"mutex"	 	/* these are args to px_ipc_name() */
 #define	SEM_NEMPTY	"nempty"
 #define	SEM_NSTORED	"nstored"
 
-int		nitems;					/* read-only by producer and consumer */
-struct {	/* data shared by producer and consumer */
+int		nitems;	/* read-only by producer and consumer */
+
+/* data shared by producer and consumer */
+struct {
   int	buff[NBUFF];
   sem_t	*mutex, *nempty, *nstored;
 } shared;
@@ -23,24 +25,21 @@ main(int argc, char **argv)
 		err_quit("usage: prodcons1 <#items>");
 	nitems = atoi(argv[1]);
 
-		/* 4create three semaphores */
-	shared.mutex = Sem_open(Px_ipc_name(SEM_MUTEX), O_CREAT | O_EXCL,
-							FILE_MODE, 1);
-	shared.nempty = Sem_open(Px_ipc_name(SEM_NEMPTY), O_CREAT | O_EXCL,
-							 FILE_MODE, NBUFF);
-	shared.nstored = Sem_open(Px_ipc_name(SEM_NSTORED), O_CREAT | O_EXCL,
-							  FILE_MODE, 0);
+	/* create three semaphores */
+	shared.mutex   = Sem_open(Px_ipc_name(SEM_MUTEX),   O_CREAT | O_EXCL, FILE_MODE, 1);
+	shared.nempty  = Sem_open(Px_ipc_name(SEM_NEMPTY),  O_CREAT | O_EXCL, FILE_MODE, NBUFF);
+	shared.nstored = Sem_open(Px_ipc_name(SEM_NSTORED), O_CREAT | O_EXCL, FILE_MODE, 0);
 
-		/* 4create one producer thread and one consumer thread */
+	/* create one producer thread and one consumer thread */
 	Set_concurrency(2);
 	Pthread_create(&tid_produce, NULL, produce, NULL);
 	Pthread_create(&tid_consume, NULL, consume, NULL);
 
-		/* 4wait for the two threads */
+	/* wait for the two threads */
 	Pthread_join(tid_produce, NULL);
 	Pthread_join(tid_consume, NULL);
 
-		/* 4remove the semaphores */
+	/* remove the semaphores */
 	Sem_unlink(Px_ipc_name(SEM_MUTEX));
 	Sem_unlink(Px_ipc_name(SEM_NEMPTY));
 	Sem_unlink(Px_ipc_name(SEM_NSTORED));
@@ -54,7 +53,8 @@ produce(void *arg)
 {
 	int		i;
 
-	for (i = 0; i < nitems; i++) {
+	for (i = 0; i < nitems; i++) 
+	{
 		Sem_wait(shared.nempty);	/* wait for at least 1 empty slot */
 		Sem_wait(shared.mutex);
 		shared.buff[i % NBUFF] = i;	/* store i into circular buffer */
@@ -69,9 +69,11 @@ consume(void *arg)
 {
 	int		i;
 
-	for (i = 0; i < nitems; i++) {
-		Sem_wait(shared.nstored);		/* wait for at least 1 stored item */
+	for (i = 0; i < nitems; i++) 
+	{
 		Sem_wait(shared.mutex);
+		Sem_wait(shared.nstored);		/* wait for at least 1 stored item */
+		
 		if (shared.buff[i % NBUFF] != i)
 			printf("buff[%d] = %d\n", i, shared.buff[i % NBUFF]);
 		Sem_post(shared.mutex);

@@ -1,7 +1,7 @@
 #include	"unpipc.h"
 
 #define	LOCK_PATH	"pxsemlock"
-
+// 图10-19 使用posix有名信号量的文件上锁
 sem_t	*locksem;
 int		initflag;
 
